@@ -1,0 +1,61 @@
+---
+title: "hw4"
+author: "Sai Gugulothu"
+date: "3/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(ggplot2)
+library(datasets)
+library(tidyverse)
+library(dplyr)
+
+
+```
+
+
+Question 1: 
+```{r}
+weight0 <- ChickWeight %>% group_by(Diet) %>% summarize(Occurrences =n(), mean_weight=mean(weight), weight_stand_dev=sd(weight))
+
+
+weight0
+
+```
+
+
+Question 2:
+
+```{r}
+complete <- ChickWeight %>% group_by(Chick) %>% mutate(num_feed=n()) %>% filter(num_feed==12) %>% select(-num_feed)
+print(head(tbl_df(complete),3))
+
+```
+
+Question 3:
+
+```{r}
+complete <- complete %>% group_by(Chick) %>%  mutate(differ = (weight - lag(weight, default = weight[1])), weight_gain = cumsum(differ)) %>% select(-differ)
+print(head(tbl_df(complete),3))
+```
+
+Question 4:
+
+```{r}
+box <- complete %>% filter(Time==21)
+
+ggplot(box, aes(x = reorder(Diet, weight_gain, f = median), y = weight_gain, color = Diet)) + geom_boxplot() + coord_cartesian(ylim = c(0, 350)) + labs(title = "Weight Gain Resulted From The Diet", x = "Diet", y = "Weight Gain") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+Question 5: 
+
+```{r}
+comsum <- complete %>% group_by(Chick, Diet) %>% summarize(total_gain = max(weight_gain)) %>% arrange(total_gain)
+print(tbl_df(comsum), n = 40)
+ggplot(comsum, aes(x = reorder(Chick, -total_gain), y = total_gain, fill = Diet)) + geom_bar(stat = "identity") + labs(title = "Total Weight Gain For Each Chick", x = "Weight Gain Per Chick" , y = "Total Weight Gain") + theme(plot.title = element_text(hjust = 0.5)) + coord_flip()
+```
